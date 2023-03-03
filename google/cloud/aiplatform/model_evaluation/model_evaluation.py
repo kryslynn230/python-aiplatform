@@ -15,14 +15,18 @@
 # limitations under the License.
 #
 
+from typing import Dict, Optional
+
 from google.auth import credentials as auth_credentials
 
+from google.cloud import aiplatform
 from google.cloud.aiplatform import base
-from google.cloud.aiplatform import utils
 from google.cloud.aiplatform import models
-from google.protobuf import struct_pb2
+from google.cloud.aiplatform import pipeline_jobs
+from google.cloud.aiplatform import utils
 
-from typing import Optional
+
+_LOGGER = base.Logger(__name__)
 
 
 class ModelEvaluation(base.VertexAiResourceNounWithFutureManager):
@@ -36,13 +40,55 @@ class ModelEvaluation(base.VertexAiResourceNounWithFutureManager):
     _format_resource_name_method = "model_evaluation_path"
 
     @property
-    def metrics(self) -> Optional[struct_pb2.Value]:
+    def metrics(self) -> Dict:
         """Gets the evaluation metrics from the Model Evaluation.
         Returns:
             A dict with model metrics created from the Model Evaluation or
             None if the metrics for this evaluation are empty.
+        Raises:
+            ValueError: If the Model Evaluation doesn't have metrics.
         """
-        return self._gca_resource.metrics
+        if self._gca_resource.metrics:
+            return self.to_dict()["metrics"]
+
+        raise ValueError(
+            "This ModelEvaluation does not have any metrics, this could be because the Evaluation job failed. Check the logs for details."
+        )
+
+    @property
+    def _backing_pipeline_job(self) -> Optional["pipeline_jobs.PipelineJob"]:
+        """The managed pipeline for this model evaluation job.
+        Returns:
+            The PipelineJob resource if this evaluation ran from a managed pipeline or None.
+        """
+        if (
+            "metadata" in self._gca_resource
+            and "pipeline_job_resource_name" in self._gca_resource.metadata
+        ):
+            return aiplatform.PipelineJob.get(
+                resource_name=self._gca_resource.metadata["pipeline_job_resource_name"],
+                credentials=self.credentials,
+            )
+
+    @property
+    def _metadata_output_artifact(self) -> Optional["aiplatform.Artifact"]:
+        """The MLMD Artifact created by the Model Evaluation pipeline.
+        Returns:
+            The MLMD Artifact resource if this Model Evaluation was created from a pipeline run.
+        """
+        pipeline_job = self._backing_pipeline_job
+
+        if not pipeline_job:
+            return
+
+        for component in pipeline_job.task_details:
+            for output_name in component.outputs:
+                if output_name == "evaluation_metrics":
+                    for artifact in component.outputs[output_name].artifacts:
+                        if artifact.display_name == "evaluation_metrics":
+                            return aiplatform.Artifact.get(
+                                resource_id=artifact.name, credentials=self.credentials
+                            )
 
     def __init__(
         self,
