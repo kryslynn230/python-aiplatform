@@ -244,9 +244,9 @@ class _LanguageModel:
             ValueError: If the "tuned_model_location" value is not supported
             RuntimeError: If the model does not support tuning
         """
-        if tuning_job_location != _TUNING_LOCATION:
+        if tuning_job_location not in _TUNING_LOCATIONS:
             raise ValueError(
-                f'Tuning is only supported in the following locations: tuning_job_location="{_TUNING_LOCATION}"'
+                f'Tuning is only supported in the following locations: tuning_job_location in "{_TUNING_LOCATIONS}"'
             )
         if tuned_model_location != _TUNED_MODEL_LOCATION:
             raise ValueError(
@@ -261,6 +261,7 @@ class _LanguageModel:
             model_id=model_info.tuning_model_id,
             tuning_pipeline_uri=model_info.tuning_pipeline_uri,
             model_display_name=model_display_name,
+            tuning_job_location=tuning_job_location,
         )
 
         job = _LanguageModelTuningJob(
@@ -698,7 +699,7 @@ class ChatSession:
 
 ###### Model tuning
 # Currently, tuning can only work in this location
-_TUNING_LOCATION = "europe-west4"
+_TUNING_LOCATIONS = ["europe-west4", "us-central1"]
 # Currently, deployment can only work in this location
 _TUNED_MODEL_LOCATION = "us-central1"
 
@@ -783,6 +784,7 @@ def _launch_tuning_job(
     tuning_pipeline_uri: str,
     train_steps: Optional[int] = None,
     model_display_name: Optional[str] = None,
+    tuning_job_location: str = _TUNING_LOCATIONS[0],
 ) -> aiplatform.PipelineJob:
     output_dir_uri = _generate_tuned_model_dir_uri(model_id=model_id)
     if isinstance(training_data, str):
@@ -804,6 +806,7 @@ def _launch_tuning_job(
         train_steps=train_steps,
         tuning_pipeline_uri=tuning_pipeline_uri,
         model_display_name=model_display_name,
+        tuning_job_location=tuning_job_location,
     )
     return job
 
@@ -814,6 +817,7 @@ def _launch_tuning_job_on_jsonl_data(
     tuning_pipeline_uri: str,
     train_steps: Optional[int] = None,
     model_display_name: Optional[str] = None,
+    tuning_job_location: str = _TUNING_LOCATIONS[0],
 ) -> aiplatform.PipelineJob:
     if not model_display_name:
         # Creating a human-readable model display name
@@ -847,7 +851,7 @@ def _launch_tuning_job_on_jsonl_data(
         display_name=None,
         parameter_values=pipeline_arguments,
         # TODO(b/275444101): Remove the explicit location once model can be deployed in all regions
-        location=_TUNING_LOCATION,
+        location=tuning_job_location,
     )
     job.submit()
     return job
