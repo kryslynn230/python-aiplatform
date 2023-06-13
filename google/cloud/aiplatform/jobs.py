@@ -761,6 +761,7 @@ class BatchPredictionJob(_Job):
                 )
             gapic_batch_prediction_job.explanation_spec = explanation_spec
 
+        service_account = service_account or initializer.global_config.service_account
         if service_account:
             gapic_batch_prediction_job.service_account = service_account
 
@@ -1687,6 +1688,7 @@ class CustomJob(_RunnableJob):
                 Optional. The timeout for the create request in seconds.
         """
         network = network or initializer.global_config.network
+        service_account = service_account or initializer.global_config.service_account
 
         self._run(
             service_account=service_account,
@@ -1862,6 +1864,8 @@ class CustomJob(_RunnableJob):
             raise ValueError(
                 "'experiment' is required since you've enabled autolog in 'from_local_script'."
             )
+
+        service_account = service_account or initializer.global_config.service_account
         if service_account:
             self._gca_resource.job_spec.service_account = service_account
 
@@ -2332,6 +2336,7 @@ class HyperparameterTuningJob(_RunnableJob):
                 Optional. The timeout for the create request in seconds.
         """
         network = network or initializer.global_config.network
+        service_account = service_account or initializer.global_config.service_account
 
         self._run(
             service_account=service_account,

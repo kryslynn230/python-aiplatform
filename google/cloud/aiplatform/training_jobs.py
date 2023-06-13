@@ -3208,6 +3208,7 @@ class CustomTrainingJob(_CustomTrainingJob):
                 produce a Vertex AI Model.
         """
         network = network or initializer.global_config.network
+        service_account = service_account or initializer.global_config.service_account
 
         worker_pool_specs, managed_model = self._prepare_and_validate_run(
             model_display_name=model_display_name,
@@ -4148,6 +4149,7 @@ class CustomContainerTrainingJob(_CustomTrainingJob):
                 were not provided in constructor.
         """
         network = network or initializer.global_config.network
+        service_account = service_account or initializer.global_config.service_account
 
         worker_pool_specs, managed_model = self._prepare_and_validate_run(
             model_display_name=model_display_name,
@@ -6662,6 +6664,7 @@ class CustomPythonPackageTrainingJob(_CustomTrainingJob):
                 produce a Vertex AI Model.
         """
         network = network or initializer.global_config.network
+        service_account = service_account or initializer.global_config.service_account
 
         worker_pool_specs, managed_model = self._prepare_and_validate_run(
             model_display_name=model_display_name,

@@ -1115,6 +1115,8 @@ class Endpoint(base.VertexAiResourceNounWithFutureManager, base.PreviewMixin):
                 is not 0 or 100.
         """
 
+        service_account = service_account or initializer.global_config.service_account
+
         max_replica_count = max(min_replica_count, max_replica_count)
 
         if bool(accelerator_type) != bool(accelerator_count):

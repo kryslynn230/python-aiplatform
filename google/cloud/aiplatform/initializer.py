@@ -93,6 +93,7 @@ class _Config:
         self._credentials = None
         self._encryption_spec_key_name = None
         self._network = None
+        self._service_account = None
 
     def init(
         self,
@@ -108,6 +109,7 @@ class _Config:
         credentials: Optional[auth_credentials.Credentials] = None,
         encryption_spec_key_name: Optional[str] = None,
         network: Optional[str] = None,
+        service_account: Optional[str] = None,
     ):
         """Updates common initialization parameters with provided options.
 
@@ -150,6 +152,8 @@ class _Config:
                 Private services access must already be configured for the network.
                 If specified, all eligible jobs and resources created will be peered
                 with this VPC.
+            service_account (str):
+                Optional. The service account used to launch jobs and deploy models.
         Raises:
             ValueError:
                 If experiment_description is provided but experiment is not.
@@ -189,6 +193,8 @@ class _Config:
             self._encryption_spec_key_name = encryption_spec_key_name
         if network is not None:
             self._network = network
+        if service_account is not None:
+            self._service_account = service_account
 
         if experiment:
             metadata._experiment_tracker.set_experiment(
@@ -291,6 +297,11 @@ class _Config:
     def network(self) -> Optional[str]:
         """Default Compute Engine network to peer to, if provided."""
         return self._network
+
+    @property
+    def service_account(self) -> Optional[str]:
+        """Default service account, if provided."""
+        return self._service_account
 
     @property
     def experiment_name(self) -> Optional[str]:

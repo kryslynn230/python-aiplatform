@@ -1714,6 +1714,7 @@ class TestModel:
             project=_TEST_PROJECT,
             location=_TEST_LOCATION,
             encryption_spec_key_name=_TEST_ENCRYPTION_KEY_NAME,
+            service_account=_TEST_SERVICE_ACCOUNT,
         )
         test_model = models.Model(_TEST_ID)
 
@@ -1724,7 +1725,6 @@ class TestModel:
             gcs_destination_prefix=_TEST_BATCH_PREDICTION_GCS_DEST_PREFIX,
             sync=sync,
             create_request_timeout=None,
-            service_account=_TEST_SERVICE_ACCOUNT,
         )
 
         if not sync:
