@@ -53,14 +53,12 @@ from google.cloud.aiplatform.compat.types import (
     model as gca_model,
 )
 
-from vertexai.preview import (
-    language_models as preview_language_models,
-)
-from vertexai import language_models
 from google.cloud.aiplatform_v1 import Execution as GapicExecution
 from google.cloud.aiplatform.compat.types import (
     encryption_spec as gca_encryption_spec,
 )
+from vertexai import language_models
+from vertexai.preview import language_models as preview_language_models
 
 _TEST_PROJECT = "test-project"
 _TEST_LOCATION = "us-central1"
