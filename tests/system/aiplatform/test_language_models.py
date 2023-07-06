@@ -179,3 +179,23 @@ class TestLanguageModels(e2e_base.TestEndToEnd):
         job.delete()
 
         assert gapic_job.state == gca_job_state_v1beta1.JobState.JOB_STATE_SUCCEEDED
+
+    def test_batch_prediction_for_textembedding(self):
+        source_uri = "gs://ucaip-samples-us-central1/model/llm/batch_prediction/batch_prediction_prompts1.jsonl"
+        destination_uri_prefix = "gs://ucaip-samples-us-central1/model/llm/batch_prediction/predictions/text-bison@001_"
+
+        aiplatform.init(project=e2e_base._PROJECT, location=e2e_base._LOCATION)
+
+        model = TextEmbeddingModel.from_pretrained("textembedding-gecko")
+        job = model.batch_predict(
+            source_uri=source_uri,
+            destination_uri_prefix=destination_uri_prefix,
+            model_parameters={"temperature": 0, "top_p": 1, "top_k": 5},
+        )
+
+        job.wait_for_resource_creation()
+        job.wait()
+        gapic_job = job._gca_resource
+        job.delete()
+
+        assert gapic_job.state == gca_job_state_v1beta1.JobState.JOB_STATE_SUCCEEDED
